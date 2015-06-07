@@ -4,6 +4,9 @@ define(function(){
 		
 		init: function(){
 			
+			/**
+			 * Function for getting the index of an array by name and value
+			 */ 
 			Array.prototype.getIndexBy = function (name, value) {
 				for (var i = 0; i < this.length; i++) {
 					if (this[i][name] == value) {
@@ -12,6 +15,9 @@ define(function(){
 				}
 			},
 			
+			/**
+			 * Function for sorting an array based on field, direction and potential primer. This is to be used with Array.sort()
+			 */ 
 			Array.prototype.sortBy = function(field, reverse, primer){
 
 				var key = primer ? 

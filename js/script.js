@@ -88,10 +88,7 @@ function(ArrayUtilities,
 		
 		var init = function(canvas){
 			
-			/**
-			 * Function for getting the index of an array by name and value
-			 */ 
-			
+			// include all Array Utility functions
 			ArrayUtilities.init();
 			
 			canvas = document.getElementById(canvas);
@@ -133,8 +130,10 @@ function(ArrayUtilities,
 			Game.NPC.forEach(function(entry){
 				if(!entry.isDead && entry.specific.mapRegion != undefined && entry.specific.mapRegion.x.x <= Game.offsetX && entry.specific.mapRegion.x.y >= Game.offsetX && entry.specific.mapRegion.y.x <= Game.offsetY && entry.specific.mapRegion.y.y >= Game.offsetY){
 					
+					// Are we colliding with the player?
 					entry.playerCollide(player);
 					
+					// Are we allowed to move or is the player interacting with us?
 					if(entry.questUpdate(player))
 						entry.waypointUpdate(entry.specific.waypoint);
 					
@@ -148,24 +147,32 @@ function(ArrayUtilities,
 		var render = function(){
 			ct.clearRect(0,0,width,height);
 			
-			// Our position
+			// Our current array position
 			var arrPos = Map.playerArrayPosition(player.position, 1, 1);
 
+			// Have we moved close enough to the edge to the right to begin a region transition?
 			if(arrPos.x >= 25 && arrPos.x != lastArrPos.x || arrPos.x == 24 && lastArrPos.x == 25){
 				
+				// Increment by 1 to ensure a smooth transition
 				if(arrPos.x > lastArrPos.x) Game.offsetX += 1;
+				// Going back, remove the offset incremented
 				else if(arrPos.x < lastArrPos.x && Game.offsetX > 0) Game.offsetX -= 1;
 				lastArrPos.x = arrPos.x;
 				
+				// Now we are close enough to the edge, show us the full new region
 				if(arrPos.x > 28){
+					// Set the position of the player to the correct one even with the region change
 					player.position.x = 32*11;
 					lastArrPos.x = Map.playerArrayPosition(player.position, 1, 1);
+					// Increment the region by 15
 					Game.offsetX += 15;
+					// The offset must be rounded to 20, 40, 60 or 80 and so on...
 					Game.offsetX = Math.round(Game.offsetX/10)*10;
 				}
 				console.log(Game.offsetX);
 			}
 			else if(arrPos.x <= 6 && Game.offsetX > 0 && arrPos.x != lastArrPos.x){
+				// Same procedure as above, but for the left istead of right 
 				if(arrPos.x > lastArrPos.x) Game.offsetX += 1;
 				else if(arrPos.x < lastArrPos.x) Game.offsetX -= 1;
 				lastArrPos.x = arrPos.x;
@@ -180,7 +187,7 @@ function(ArrayUtilities,
 			
 			//Going down
 			if(arrPos.y >= 13 && arrPos.y != lastArrPos.y || arrPos.y == 12 && lastArrPos.y == 13){
-				
+				// Same as above again but for going down
 				if(arrPos.y > lastArrPos.y) Game.offsetY += 1;
 				else if(arrPos.y < lastArrPos.y && Game.offsetY > 0) Game.offsetY -= 1;
 				lastArrPos.y = arrPos.y;
@@ -195,6 +202,7 @@ function(ArrayUtilities,
 			}
 			// Going up
 			else if(arrPos.y <= 4 && Game.offsetY > 0 && arrPos.y != lastArrPos.x){
+				// And the last one for tampering the offset, but this time the player is going upwards
 				if(arrPos.y > lastArrPos.y) Game.offsetY += 1;
 				else if(arrPos.y < lastArrPos.y) Game.offsetY -= 1;
 				lastArrPos.y = arrPos.y;
@@ -215,7 +223,7 @@ function(ArrayUtilities,
 			bloodPos.forEach(function (entry, index) {
 				
 				if(entry.mapRegion.x.x <= Game.offsetX && entry.mapRegion.x.y >= Game.offsetX && entry.mapRegion.y.x <= Game.offsetY && entry.mapRegion.y.y >= Game.offsetY){
-					//Move the NPC's if the map position changes
+					//Move the blood if the map position changes
 					if(entry.mapOffset.x != Game.offsetX){
 						if(entry.mapOffset.x > Game.offsetX) entry.x += 32;
 						else entry.x -= 32;
@@ -288,6 +296,7 @@ function(ArrayUtilities,
 			Game.loot.forEach(function(entry){ entry.draw(ct); });
 			
 			if(Game.showQuest){
+				// Show the quest information
 				var quest = Game.questLog[Game.questLog.length-1].quest;
 				
 				ct.fillStyle = "rgba(0,0,0,0.8)";
@@ -304,9 +313,10 @@ function(ArrayUtilities,
 			}
 			
 			if(Game.showQuestProgress && new Date() - Game.showQuestProgress.time <= 3000){
-				
+				// Quest progress have been made, show the text for 3000 milliseconds
 				var text = "Progress "+Game.showQuestProgress.progress+" / "+Game.showQuestProgress.required;
 				
+				// Wop, quest completed, show the text
 				if(Game.showQuestProgress.progress == Game.showQuestProgress.required) text += " - Quest complete!";
 					
 				
@@ -328,6 +338,7 @@ function(ArrayUtilities,
 				render();
 			}
 			else{
+				// The game have been paused, dim the background and show the "Paused" text
 				canvas = document.getElementById('gameArea');
 				ct = canvas.getContext('2d');
 				ct.fillStyle = "rgba(0,0,0,0.4)";

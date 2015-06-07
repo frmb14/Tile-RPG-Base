@@ -371,6 +371,7 @@ define(['Vector'], function(Vector){
 		},
 		
 		playerArrayPosition: function(vector, x,y){
+			// return out array position
 			var pos = new Vector((vector.x+(x*32/2))/30 | 0,(vector.y+(y*32/2))/30 | 0);
 			return pos;
 		}

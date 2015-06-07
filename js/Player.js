@@ -80,21 +80,24 @@ function(Vector,
 				var npcId = this.specific.id;
 				
 				if(player.quests != undefined){
+					// Sort the quests array by Complete (true first, false last)
 					player.quests.sort(player.quests.sortBy('complete', true));
 					player.quests.forEach(function (entry, index) {
-							
-					//for(index in player.quests){
-						//var quest = player.quests[index];
+
 						if(entry.isAvailable() || entry.inQuestLog()){
 							entry.updateCompleted();
 							
 							var completePriority = false;
+							// Do we have a quest compeleted? Lets prioritize the completed one.
 							if(player.quests[index-1] != undefined && !player.quests[index-1].isAvailable() && player.quests[index-1].isComplete() && player.id == player.quests[index-1].turnInId && !player.quests[index-1].turnedIn){
 								completePriority = true;
 							}
-
+							
+							// Set the quest indicator color
 							var questColor = entry.inQuestLog() && !entry.isAvailable() && !entry.isComplete() ? "Lightgrey" : "Yellow";
+							// Which symbol should we use?
 							var questMark = entry.inQuestLog() && !entry.isAvailable() && player.id == entry.turnInId ? "?" : !entry.inQuestLog() && !completePriority ? "!" : "return";
+							// Did it say "return"? Then there should not be anything written out here.
 							if(questMark == "return") return;
 							ct.font = "Bold 15px Arial"; 
 							ct.fillStyle = questColor;
@@ -212,38 +215,49 @@ function(Vector,
 		
 		questUpdate: function(player){
 			var questGiverMovement = true;
+			// Are the player and the NPC close, then interaction range is true.
 			var interactionRange = this.position.x >= player.position.x - player.width && this.position.x <= player.position.x + player.width && this.position.y >= player.position.y - player.height && this.position.y <= player.position.y + player.height;
 			
+			// Any quests on this NPC?
 			if(this.specific.quests != undefined){
 				var questsArr = this.specific.quests;
 				var npcArr = this.specific;
-				//for(index in this.specific.quests){
+				//Sort the quests by complete 
 				questsArr.sort(questsArr.sortBy('complete', true));
+				// Loop through all the quests
 				questsArr.forEach(function (entry, index) {
 					if(interactionRange){
+						// Is the quest available?
 						if(entry.isAvailable()){
 							console.log(entry.title + " is available");	
 							questGiverMovement = false;
+							// Have we pressed enter?
 							if(Key.isDown(Key.ENTER) && new Date() - _timer >= 500){
+								// Only do this once / quest
 								if(!Game.showQuest){
 									Game.showQuest = true;
 									_timer = new Date();
+									// Add the quest temporarily 
 									entry.addQueue();
 									console.log("Show Quest Log");
 								}
 								else if(new Date() - _timer >= 500){
+									// The quest have already been displayed for the player and the input ENTER was pressed again, that means they have accepted it!
 									entry.accept(npcArr.id);
 									Game.showQuest = false;
 								}
 							}
 							else if(Key.isDown(Key.ESCAPE)){
+								// The quest was declined, remove the temp quest added 
 								Game.showQuest = false;
 								Game.questLog.splice(Game.questLog.length-1, 1);
 							}
 						}
 						else if(entry.isComplete() && entry.inQuestLog() && npcArr.id == entry.turnInId && new Date() - _timer >= 500){
+							// The quest have been completed and this is the correct turn in NPC, don't move away little questgiver
 							questGiverMovement = false;
 							if(Key.isDown(Key.ENTER)){
+								// Enter was presses, turn in the quest
 								entry.turnIn();
 								_timer = new Date();
 								Game.showQuest = false;
@@ -251,17 +265,23 @@ function(Vector,
 						}
 					}
 					if(!entry.isAvailable() && !entry.isComplete() && !entry.inQuestLog()){
-						
+						// Woah! The quest is not available, is not complete nor is in the questLog..?
 						var prequestsComplete = false;
-			
+						
+						// To activate this quest we need to loop through the prequests that's required
 						for(index in entry.preQuest){
+							// Is the preQuest ID (index) a valid number?
 							if( !isNaN(parseFloat(index)) && isFinite(index)){
+								// Find out if there is any quests with this ID
 								preQuestId = questsArr.getIndexBy('id', entry.preQuest[index]);
 								if(preQuestId != undefined && preQuestId != -1){
+									// A quest is found, have we completed it?
 									if(questsArr[preQuestId].isComplete() && !questsArr[preQuestId].inQuestLog()){
+										// Yes! Then this quest have been completed
 										prequestsComplete = true;
 									}
 									else{
+										// Nop, not completed. Remember that the quest array have been sorted to Completed
 										prequestsComplete = false;
 									}
 								}
@@ -269,6 +289,7 @@ function(Vector,
 						}
 						
 						if(prequestsComplete){
+							// was all quests returned completed? 
 							entry.setAvailable();
 							console.log("Pre-quests complete, set " + entry.title + " to available" );
 						}

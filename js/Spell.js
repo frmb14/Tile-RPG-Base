@@ -68,12 +68,14 @@ define(['Vector', 'Map', 'Loot'], function(Vector, Map, Loot){
 									entry.died = new Date();
 									
 									for(index in Game.questLog){
-										
+										// Loop though all accepted quests to see if we're killing any quest mobs
 										if(Game.questLog[index].quest != undefined){
 											if(Game.questLog[index].quest.killId.indexOf(entry.specific.id) >= 0){
+												// The ID matches the ones in the quest, add progress!
 												Game.questLog[index].quest.progress++;
 												Game.showQuestProgress = {time: new Date(), progress: Game.questLog[index].quest.progress, required: Game.questLog[index].quest.required};
 												if(Game.questLog[index].quest.progress >= Game.questLog[index].quest.required){
+													// Enough kills have been met, set the quest to complete
 													console.log("Quest compelete!");
 													Game.questLog[index].quest.complete = true;
 												}
@@ -95,14 +97,6 @@ define(['Vector', 'Map', 'Loot'], function(Vector, Map, Loot){
 		 * Don't allow any spells to go though objects or walls.
 		 */
 		objectCollide: function(isY, position, direction){
-			
-			// Are we going into a wall? I hope not! We're not allowed to go through walls here.
-			// This needs a better algorithm.. 
-			//var posY = (this.position.y+(y*this.height/2))/30 | 0;
-			//return Map.collisionMap[posY > 14 ? 14+Game.offsetY : posY+Game.offsetY][((this.position.x+(x*this.width/2))/30 | 0)+Game.offsetX];
-			
-			// Correct the direction value when offsetX is bigger than 15, unknown bug.
-			//if(Game.offsetX > 15 && Math.sign(intent) == -1 ) direction.x = direction.x * 2;
 
 			var newPosition = false,
 				tryPosition = isY ? Math.floor((position.y+32)/30)+Game.offsetY : Math.floor((position.x+32)/30)+Game.offsetX,

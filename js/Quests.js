@@ -20,7 +20,7 @@ define(function(){
 		
 		
 		Game.quests.push(
-			//{id: this.id, quest: {title: this.title, context: this.context, objective: this.objective, type: this.type, required: this.required, killId: this.killId, available: this.available, complete: this.complete, preQuest: this.preQuest}}
+			// Add the quest to the global quests array
 			{id: this.id, quest: this}
 		);
 	}
@@ -29,16 +29,18 @@ define(function(){
 		
 		addQueue: function(){
 			Game.questLog.push(
-				//{id: this.id, quest: {title: this.title, context: this.context, objective: this.objective, type: this.type, required: this.required, killId: this.killId, progress: this.progress, complete: this.complete, preQuest: this.preQuest}}
+				// Add the quest to the global questLog array
 				{id: this.id, quest: this}
 			);
 		},
 		
 		accept: function(giverId){
-
+			
 			if(giverId != this.turnInId){
+				// The quest is supposed to be turned in at another quest giver
 				console.log("Move the quest to NPC " + this.turnInId);
 				var quest = this;
+				// Find the quest giver and transfer the quest to them
 				Game.NPC.forEach(function(entry){
 					if(entry.specific.id == quest.turnInId){
 						entry.specific.quests.push(quest);
@@ -47,6 +49,7 @@ define(function(){
 				});
 			}
 			
+			// Remove from from available quests
 			this.available = false;
 			console.log(Game.questLog);
 			console.log("Accepting quest " + this.id + " " + this.title);
@@ -54,10 +57,12 @@ define(function(){
 		
 		turnIn: function(){
 			
+			// Set this quest to turned in
 			this.turnedIn = true;
 			
 			console.log("Turn in Quest " +this.title);
 			
+			// Get this id in the questLog array with the ArrayUtilities and remove it from the quest log. (Quest rewards?)
 			var index = Game.questLog.getIndexBy("id", this.id);
 			Game.questLog.splice(index, 1);
 			
@@ -65,12 +70,15 @@ define(function(){
 		},
 		
 		addProgress: function(){
+			// increment the progress
 			this.progress++;
 		},
 		
 		updateCompleted: function(){
+			// Find this quest ID in the questlog array
 			var index = Game.questLog.getIndexBy("id", this.id);
 			if(index != undefined){
+				// ID found, set this quest to complete
 				if(Game.questLog[index].quest.complete || Game.questLog[index].quest.type == 3){
 					this.complete = true;
 				}
@@ -90,6 +98,7 @@ define(function(){
 		},
 		
 		inQuestLog: function(){
+			// Find the quest in the questLog array, return true if found or false if not found
 			var index = Game.questLog.getIndexBy("id", this.id);
 			if(index != undefined){
 				return true;
